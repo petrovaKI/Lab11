@@ -19,7 +19,8 @@ HunterGate(
 )
 
 project(builder)
-
+hunter_add_package(GTest)
+find_package(GTest CONFIG REQUIRED)
 hunter_add_package(Boost COMPONENTS program_options filesystem system regex)
 hunter_add_package(Async++)
 find_package(Async++ CONFIG REQUIRED)
@@ -49,5 +50,11 @@ target_link_libraries(builder process Async++::Async++
             ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
             )
 
-
+target_link_libraries(
+        tests
+        builder
+        GTest::gtest_main
+)
+enable_testing()
+add_test(NAME unit_tests COMMAND tests)
 target_link_libraries(main builder)
