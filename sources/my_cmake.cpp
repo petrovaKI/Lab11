@@ -1,31 +1,28 @@
 // Copyright 2022 Petrova Kseniya <petrovaKI>
 #include "my_cmake.hpp"
-using namespace std::chrono;
+namespace chrono = std::chrono;
 
 void start_cmake(int argc, char* argv[]) {
-
-  options_description desc("Options");
+  po::options_description desc("Options");
   desc.add_options()
       ("help", "help information")
-          ("config", value<std::string>(),
+          ("config", po::value<std::string>(),
               "конфигурация сборки (по умолчанию Debug)")
               ("install",
                "этап установки (в директорию _install)")
                   ("pack",
                    "этап упаковки (в архив формата tar.gz)")
-                      ("timeout", value<time_t>(),
-                          "время ожидания (в секундах)")
-      ;
+                      ("timeout", po::value<time_t>(),
+                          "время ожидания (в секундах)");
 
-  variables_map vm;
-  store(parse_command_line(argc, argv, desc), vm);
-  notify(vm);
+  po::variables_map vm;
+  po::store(parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
   //если аргументы не заданы выводим информационное сообщение
   if (vm.count("help") && !vm.count("config")  && !vm.count("pack")
       && !vm.count("timeout") && !vm.count("install")) {
     std::cout << desc << "\n";
-  }
-  else {
+  }else{
     //конфигурация по умолчанию debug
     std::string config = "Debug";
     //фиксируем текущее время
@@ -102,8 +99,7 @@ void start_cmake(int argc, char* argv[]) {
           });
         }
       }
-    }
-    else {
+    }else{
       std::cerr << "config = " << config << " doesn't exist!\n";
     }
   }
@@ -111,9 +107,9 @@ void start_cmake(int argc, char* argv[]) {
 
 void create_child(const std::string& command, const time_t& period) {
   std::string line;
-  ipstream out;
+  processes::ipstream out;
 
-  child process(command, std_out > out);
+  processes::child process(command, processes::std_out > out);
 
   std::thread checkTime(check_time, std::ref(process),
                         std::ref(period));
@@ -126,9 +122,9 @@ void create_child(const std::string& command, const time_t& period) {
 
 void create_child(const std::string& command, const time_t& period, int& res) {
   std::string line;
-  ipstream out;
+  processes::ipstream out;
 //std_out - выходной поток для дочернего процесса
-  child process(command, std_out > out);
+  processes::child process(command, processes::std_out > out);
 
   std::thread checkTime(check_time, std::ref(process),
                         std::ref(period));
@@ -141,7 +137,7 @@ void create_child(const std::string& command, const time_t& period, int& res) {
   res = process.exit_code();
 }
 
-void check_time(child& process, const time_t& period) {
+void check_time(processes::child& process, const time_t& period) {
   time_t start = time_now();
 
   while (true) {
@@ -158,7 +154,6 @@ void check_time(child& process, const time_t& period) {
 }
 
 time_t time_now() {
-  return system_clock::to_time_t(
-      system_clock::now()
-  );
+  return chrono::system_clock::to_time_t(
+      chrono::system_clock::now());
 }
