@@ -146,8 +146,7 @@ void check_time(processes::child& process, const time_t& period) {
       process.terminate(ec);
       std::cout << ec;
       break;
-    }
-    else if (!process.running()) {
+    }else if (!process.running()) {
       break;
     }
   }
