@@ -44,4 +44,10 @@ target_include_directories(builder
 target_link_libraries(builder process Async++::Async++
         Boost::program_options Boost::filesystem Boost::system Boost::regex)
 
+    add_executable(tests
+
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
+            )
+
+
 target_link_libraries(main builder)
